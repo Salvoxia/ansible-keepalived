@@ -28,7 +28,7 @@ jobs:
           yamllint .
 
       - name: Run ansible-lint
-        uses: ansible/ansible-lint@v24.12.2
+        uses: ansible/ansible-lint@v26
   molecule:
     name: Molecule
     runs-on: ubuntu-latest
@@ -48,17 +48,30 @@ jobs:
       - name: Check out the codebase.
         uses: actions/checkout@v4
 
+      - name: Set up Python 3 (CentOS 8 / Debian 10 / RockyLinux 9).
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+        if: matrix.distro == 'centos8' || matrix.distro == 'debian10' || matrix.distro == 'rockylinux9'
+
+      - name: Set up Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+        if: matrix.distro != 'centos8' && matrix.distro != 'debian10'
+
       - name: Set up Python 3
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+        if: matrix.distro != 'centos8' && matrix.distro != 'debian10'  && matrix.distro != 'rockylinux9'
 
       - name: Install test dependencies (CentOS 8 / Debian 10 / Rockylinux 9).
-        run: pip3 install ansible==9.13.0 molecule molecule-docker yamllint ansible-lint docker netaddr dnspython
+        run: pip3 install ansible==9.13.0 molecule molecule-plugins[docker] yamllint ansible-lint docker netaddr dnspython ansible-compat>=25.1.4
         if: matrix.distro == 'centos8' || matrix.distro == 'debian10' || matrix.distro == 'rockylinux9'
 
       - name: Install test dependencies.
-        run: pip3 install ansible molecule molecule-docker yamllint ansible-lint docker netaddr dnspython
+        run: pip3 install ansible molecule molecule-plugins[docker] yamllint ansible-lint docker netaddr dnspython
         if: matrix.distro != 'centos8' && matrix.distro != 'debian10'  && matrix.distro != 'rockylinux9'
 
       - name: Install ansible test dependencies
