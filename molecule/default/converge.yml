@@ -13,7 +13,7 @@
 
   - name: Install basic packages
     ansible.builtin.package:
-      update_cache: "{{ ansible_os_family == 'Debian' | ternary('yes', omit) }}"
+      update_cache: "{{ (ansible_os_family == 'Debian') | ternary(true, omit) }}"
       name: "{{ packagelist[ansible_os_family] | default([]) }}"
       state: present
     vars:
